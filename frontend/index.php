@@ -22,34 +22,37 @@
                     <td>Id</td>
                     <td>Nome</td>
                     <td>Autor</td>
+                    <td>Status</td>
+                    <td>Criado em</td>
                     <td>Ações</td>
                 </tr>
             </thead>
             <tbody>
 
                 <?php
-                $apiUrl = 'http://127.0.0.1:8000';
+                $apiUrl = 'http://api:8000';
                 $response = file_get_contents("{$apiUrl}/todos_os_livros");
                 $data = json_decode($response, true);
                 if ($data &&  isset($data['livros']) && is_array($data['livros'])) {
                     foreach ($data['livros'] as $livro) {
                         echo '<tr>';
                         echo "<td>{$livro['id']}</td>";
-                        echo "<td>{$livro['nome']}</td>";
+                        echo "<td><a href='detalhes.php?id={$livro['id']}'>{$livro['nome']}</a></td>";
                         echo "<td>{$livro['autor']}</td>";
+                        echo "<td>{$livro['status']}</td>";
+                        echo "<td>{$livro['created_at']}</td>";
                         echo '<td>';
                         echo "<a href='form.php?id={$livro['id']}' class='botao-editar'>Editar</a>";
                         echo "<form action='processar.php' method='POST'style='display:inline-block;'>";
-                        echo "<input = type='hidden' name='action' value='deletar'>";
+                        echo "<input type='hidden' name='action' value='deletar'>";
                         echo "<input type='hidden' name='livro_id' value='{$livro['id']}'>";
                         echo "<button type='submit' class='botao-deletar' onclick=\"return confirm('Tem certeza que deseja deletar este livro?');\">Deletar</button>";
                         echo '</form>';
                         echo '</td>';
                         echo '</tr>';
-                        
                     }
                 } else {
-                    echo "<tr><td> colspan='4'>Nenhum livro encontrado.</td></tr>";
+                    echo "<tr><td colspan='6'>Nenhum livro encontrado.</td></tr>";
                 }
                 ?>
             

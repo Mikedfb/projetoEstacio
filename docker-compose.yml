@@ -1,0 +1,39 @@
+
+
+services:
+  # Serviço do banco de dados (PostgreSQL)
+  db:
+    image: postgres:13
+    container_name: fastapidb_container
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 9946
+      POSTGRES_DB: fastapidb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Serviço da API (FastAPI)
+  api:
+    build:
+       context: ./backend
+    container_name: fastapi_api_container
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+
+  # Serviço do Frontend (PHP com Apache)
+  frontend:
+    image: php:8.1-apache
+    container_name: php_frontend_container
+    volumes:
+      - ./frontend:/var/www/html
+    ports:
+      - "80:80"
+
+volumes:
+  postgres_data:

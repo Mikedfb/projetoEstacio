@@ -11,21 +11,20 @@
     <header>
         <?php
             $titulo = "Adicionar Livro";
-            $livro = ['nome' => '', 'autor' => ''];
+            $livro = ['nome' => '', 'autor' => '', 'status' => 'ativo'];
             $action = "adicionar";
 
             if (isset($_GET['id'])) {
                 $titulo = "Editar Livro";
                 $action = "editar";
                 $livro_id = $_GET['id'];
-                $apiUrl = 'http://127.0.0.1:8000';
-                $response = file_get_contents("{$apiUrl}/todos_os_livros");
-                $data = json_decode($response, true);
-                foreach ($data['livros'] as $item) {
-                    if ($item['id'] == $livro_id) {
-                        $livro = $item;
-                        break;
-                    }
+                $apiUrl = 'http://api:8000';
+                
+                $response = file_get_contents("{$apiUrl}/livros/{$livro_id}");
+                $livro = json_decode($response, true);
+                if (!$livro) {
+                    echo "<h1> Erro ao carregar o livro! </h1>";
+                    exit;
                 }
             }
         ?>
@@ -49,7 +48,14 @@
 
             <label for="autor">Autor:</label>
             <input type="text" name="autor" value="<?php echo htmlspecialchars($livro['autor']); ?>" required>
+            <br>
 
+            <label for="status">Status:</label>
+            <select name="status" id="status">
+                <option value="ativo" <?php echo ($livro['status'] ?? '') == 'ativo' ? 'selected' : ''; ?>>Ativo</option>
+                <option value="pausado" <?php echo ($livro['status'] ?? '') == 'pausado' ? 'selected' : ''; ?>>Pausado</option>
+                <option value="finalizado" <?php echo ($livro['status'] ?? '') == 'finalizado' ? 'selected' : ''; ?>>Finalizado</option>
+            </select>
             <br>
 
             <button type="submit">Salvar Livro</button>

@@ -1,6 +1,6 @@
 <?php
 
-$apiUrl = 'http://127.0.0.1:8000';
+$apiUrl = 'http://api:8000';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
@@ -11,26 +11,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     switch ($action) {
         case 'adicionar':
-            $nome = $_POST['nome'] ?? '';
-            $autor = $_POST['autor'] ?? '';
-
-            $data = json_encode(['nome' => $nome, 'autor' => $autor]);
-
-            curl_setopt($ch, CURLOPT_URL, "{$apiUrl}/adicionar_livro");
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-            break;
-
         case 'editar':
-            $livro_id = $_POST['livro_id'] ?? '';
             $nome = $_POST['nome'] ?? '';
             $autor = $_POST['autor'] ?? '';
+            $status = $_POST['status'] ?? 'ativo';
 
-            $data = json_encode(['nome' => $nome, 'autor' => $autor]);
+            if (empty($nome) || empty($autor)) {
+                echo "<h1>Erro!</h1>";
+                echo "<p>Nome e Autor do livro são campos obrigatórios.</p>";
+                echo "<a href='index.php'>Voltar</a>";
+                exit;
+            }
 
-            curl_setopt($ch, CURLOPT_URL, "{$apiUrl}/atualizar_livro/{$livro_id}");
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+            $data = json_encode(['nome' => $nome, 'autor' => $autor, 'status' => $status]);
+
+            if ($action === 'adicionar') {
+                curl_setopt($ch, CURLOPT_URL, "{$apiUrl}/adicionar_livro");
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+            } else { // 'editar'
+                $livro_id = $_POST['livro_id'] ?? '';
+                curl_setopt($ch, CURLOPT_URL, "{$apiUrl}/atualizar_livro/{$livro_id}");
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+            }
             break;
 
         case 'deletar':
@@ -39,6 +43,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
             break;
 
+        default:
+            echo "Ação desconhecida.";
+            exit;
     }
 
     $response = curl_exec($ch);
@@ -46,18 +53,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     curl_close($ch);
 
     if ($http_code >= 200 && $http_code < 300) {
-
         header('Location: index.php');
         exit;
-
-        } else {
-
+    } else {
         $error_data = json_decode($response, true);
         echo "<h1> Erro na API! </h1>";
         echo "<p> Código HTTP: {$http_code}</p>";
-        echo "<p> Mensagem de erro: " . ($error_data['erro'] ?? 'N/A') . "</p>";
-        echo "a href='index.php>Voltar</a>";
+        
+        if (isset($error_data['detail'])) {
+            echo "<p> Mensagem de erro: " . htmlspecialchars($error_data['detail']) . "</p>";
+        } else {
+            echo "<p> Resposta da API: " . htmlspecialchars($response) . "</p>";
+        }
 
+        echo "<a href='index.php'>Voltar</a>";
     }
 }
-?>
