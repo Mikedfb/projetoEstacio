@@ -12,34 +12,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     switch ($action) {
         case 'adicionar':
         case 'editar':
-            $nome = $_POST['nome'] ?? '';
-            $autor = $_POST['autor'] ?? '';
-            $status = $_POST['status'] ?? 'ativo';
+            $titulo = $_POST['titulo'] ?? '';
+            $responsavel = $_POST['responsavel'] ?? '';
+            $status = $_POST['status'] ?? 'pendente';
 
-            if (empty($nome) || empty($autor)) {
+            if (empty($titulo) || empty($responsavel)) {
                 echo "<h1>Erro!</h1>";
-                echo "<p>Nome e Autor do livro são campos obrigatórios.</p>";
+                echo "<p>Título e Responsável do projeto são campos obrigatórios.</p>";
                 echo "<a href='index.php'>Voltar</a>";
                 exit;
             }
 
-            $data = json_encode(['nome' => $nome, 'autor' => $autor, 'status' => $status]);
+            $data = json_encode(['titulo' => $titulo, 'responsavel' => $responsavel, 'status' => $status]);
 
             if ($action === 'adicionar') {
-                curl_setopt($ch, CURLOPT_URL, "{$apiUrl}/adicionar_livro");
+                curl_setopt($ch, CURLOPT_URL, "{$apiUrl}/adicionar_projeto");
                 curl_setopt($ch, CURLOPT_POST, true);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
             } else { // 'editar'
-                $livro_id = $_POST['livro_id'] ?? '';
-                curl_setopt($ch, CURLOPT_URL, "{$apiUrl}/atualizar_livro/{$livro_id}");
+                $projeto_id = $_POST['projeto_id'] ?? '';
+                curl_setopt($ch, CURLOPT_URL, "{$apiUrl}/atualizar_projeto/{$projeto_id}");
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
             }
             break;
 
         case 'deletar':
-            $livro_id = $_POST['livro_id'] ?? '';
-            curl_setopt($ch, CURLOPT_URL, "{$apiUrl}/deletar_livro/{$livro_id}");
+            $projeto_id = $_POST['projeto_id'] ?? '';
+            curl_setopt($ch, CURLOPT_URL, "{$apiUrl}/deletar_projeto/{$projeto_id}");
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
             break;
 
